@@ -1,5 +1,6 @@
 package com.example.sumativa1.screens
 
+import android.util.Patterns
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.*
@@ -7,17 +8,25 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import com.example.sumativa1.data.AuthRepository // Importar AuthRepository
+import com.airbnb.lottie.compose.*
+import com.example.sumativa1.R
+import com.example.sumativa1.data.AuthRepository
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ForgotPasswordScreen(
-    onNavigateBackToLogin: () -> Unit // Para volver a la pantalla de Login
+    onNavigateBackToLogin: () -> Unit
 ) {
     var email by remember { mutableStateOf("") }
-    var message by remember { mutableStateOf<String?>(null) } // Para mensajes al usuario
-    var isError by remember { mutableStateOf(false) } // Para colorear el mensaje
-    val authRepository = AuthRepository
+    var message by remember { mutableStateOf<String?>(null) }
+    var isError by remember { mutableStateOf(false) }
+
+    val composition by rememberLottieComposition(
+        LottieCompositionSpec.RawRes(R.raw.recuperar)
+    )
+
+    fun isValidEmail(value: String) =
+        value.isNotBlank() && Patterns.EMAIL_ADDRESS.matcher(value).matches()
 
     Column(
         modifier = Modifier
@@ -26,60 +35,70 @@ fun ForgotPasswordScreen(
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center
     ) {
-        Text("Recuperar Contraseña", style = MaterialTheme.typography.headlineMedium)
-        Spacer(modifier = Modifier.height(16.dp))
-
-        Text(
-            "Ingresa tu email y te enviaremos (simulado) instrucciones para restablecer tu contraseña.",
-            style = MaterialTheme.typography.bodyMedium,
-            modifier = Modifier.padding(bottom = 16.dp)
+        LottieAnimation(
+            composition = composition,
+            iterations = LottieConstants.IterateForever,
+            modifier = Modifier
+                .size(240.dp)
+                .padding(bottom = 16.dp)
         )
+
+        Text("Recuperar contraseña", style = MaterialTheme.typography.headlineMedium)
+        Spacer(Modifier.height(8.dp))
+        Text(
+            "Ingresa tu correo y te enviaremos instrucciones (simulado).",
+            style = MaterialTheme.typography.bodyMedium
+        )
+        Spacer(Modifier.height(16.dp))
 
         OutlinedTextField(
             value = email,
-            onValueChange = { email = it },
-            label = { Text("Email") },
+            onValueChange = {
+                email = it
+                message = null
+                isError = false
+            },
+            label = { Text("Correo electrónico") },
+            isError = isError,
             modifier = Modifier.fillMaxWidth(),
-            isError = message != null && isError // Marcar si hay un mensaje de error
+            supportingText = {
+                if (isError) Text("Ingresa un correo válido.")
+            }
         )
-        Spacer(modifier = Modifier.height(16.dp))
 
-        if (message != null) {
-            Text(
-                message!!,
-                color = if (isError) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.primary,
-                style = MaterialTheme.typography.bodySmall
-            )
-            Spacer(modifier = Modifier.height(8.dp))
-        }
+        Spacer(Modifier.height(16.dp))
 
         Button(
             onClick = {
-                message = null // Reset message
-                if (email.isBlank() || !android.util.Patterns.EMAIL_ADDRESS.matcher(email).matches()) {
-                    message = "Por favor, ingresa un email válido."
+                if (!isValidEmail(email)) {
                     isError = true
-                } else {
-                    if (authRepository.requestPasswordRecovery(email)) {
-                        message = "Si el email está registrado, recibirás un correo de recuperación."
-                        isError = false
-                    } else {
-                        // Aunque requestPasswordRecovery devuelva false si el usuario no existe,
-                        // por seguridad, es mejor dar un mensaje genérico.
-                        message = "Si el email está registrado, recibirás un correo de recuperación."
-                        isError = false
-                    }
+                    message = null
+                    return@Button
                 }
+
+                AuthRepository.requestPasswordRecovery(email)
+                isError = false
+                message = "Si el correo está registrado, recibirás un mensaje de recuperación."
             },
             modifier = Modifier.fillMaxWidth()
         ) {
-            Text("Enviar Instrucciones")
+            Text("Enviar instrucciones")
         }
-        Spacer(modifier = Modifier.height(16.dp))
+
+        if (!message.isNullOrBlank()) {
+            Spacer(Modifier.height(8.dp))
+            Text(
+                text = message!!,
+                color = if (isError) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.primary,
+                style = MaterialTheme.typography.bodySmall
+            )
+        }
+
+        Spacer(Modifier.height(16.dp))
         Text(
-            text = "Volver a Iniciar Sesión",
-            modifier = Modifier.clickable { onNavigateBackToLogin() },
-            color = MaterialTheme.colorScheme.primary
+            "Volver a iniciar sesión",
+            color = MaterialTheme.colorScheme.primary,
+            modifier = Modifier.clickable { onNavigateBackToLogin() }
         )
     }
 }

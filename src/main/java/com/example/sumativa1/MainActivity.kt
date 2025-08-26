@@ -12,10 +12,8 @@ import androidx.navigation.compose.rememberNavController
 import com.example.sumativa1.navigation.NavRouter
 import com.example.sumativa1.screens.LoginScreen
 import com.example.sumativa1.screens.RegisterScreen
-// Importar ForgotPasswordScreen y HomeScreen
 import com.example.sumativa1.screens.ForgotPasswordScreen
 import com.example.sumativa1.screens.HomeScreen
-// Eliminar las importaciones de Onboard3Screen y Onboard4Screen ya que serán reemplazadas
 import com.example.sumativa1.ui.theme.Sumativa1Theme
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -65,7 +63,6 @@ class MainActivity : ComponentActivity() {
                             )
                         }
 
-                        // Actualizada la entrada para ForgotPasswordScreen
                         composable(NavRouter.ForgotPassword.route) {
                             ForgotPasswordScreen(
                                 onNavigateBackToLogin = {
@@ -77,11 +74,9 @@ class MainActivity : ComponentActivity() {
                             )
                         }
 
-                        // Actualizada la entrada para HomeScreen
                         composable(NavRouter.Home.route) {
                             HomeScreen(
                                 onLogout = {
-                                    // Al cerrar sesión, volver a Login y limpiar el backstack
                                     navController.navigate(NavRouter.Login.route) {
                                         popUpTo(NavRouter.Login.route) { inclusive = true }
                                         launchSingleTop = true

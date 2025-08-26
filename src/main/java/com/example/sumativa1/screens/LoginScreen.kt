@@ -1,5 +1,6 @@
 package com.example.sumativa1.screens
 
+import android.util.Patterns
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.*
@@ -8,7 +9,9 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
-import com.example.sumativa1.data.AuthRepository // Importar AuthRepository
+import com.airbnb.lottie.compose.*
+import com.example.sumativa1.R
+import com.example.sumativa1.data.AuthRepository
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -19,8 +22,14 @@ fun LoginScreen(
 ) {
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
-    var showError by remember { mutableStateOf(false) }
-    val authRepository = AuthRepository // Obtener instancia del AuthRepository
+    var error by remember { mutableStateOf<String?>(null) }
+
+    val composition by rememberLottieComposition(
+        LottieCompositionSpec.RawRes(R.raw.login)
+    )
+
+    fun isValidEmail(v: String) =
+        v.isNotBlank() && Patterns.EMAIL_ADDRESS.matcher(v).matches()
 
     Column(
         modifier = Modifier
@@ -29,54 +38,80 @@ fun LoginScreen(
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center
     ) {
-        Text("Iniciar Sesión", style = MaterialTheme.typography.headlineMedium)
-        Spacer(modifier = Modifier.height(16.dp))
+        LottieAnimation(
+            composition = composition,
+            iterations = LottieConstants.IterateForever,
+            modifier = Modifier.size(220.dp)
+        )
+
+        Spacer(Modifier.height(12.dp))
+        Text("Iniciar sesión", style = MaterialTheme.typography.headlineMedium)
+        Spacer(Modifier.height(16.dp))
 
         OutlinedTextField(
             value = email,
-            onValueChange = { email = it },
-            label = { Text("Email") },
+            onValueChange = {
+                email = it
+                error = null
+            },
+            label = { Text("Correo") },
+            isError = error != null,
             modifier = Modifier.fillMaxWidth()
         )
-        Spacer(modifier = Modifier.height(8.dp))
+
+        Spacer(Modifier.height(8.dp))
+
         OutlinedTextField(
             value = password,
-            onValueChange = { password = it },
+            onValueChange = {
+                password = it
+                error = null
+            },
             label = { Text("Contraseña") },
             visualTransformation = PasswordVisualTransformation(),
+            isError = error != null,
             modifier = Modifier.fillMaxWidth()
         )
-        Spacer(modifier = Modifier.height(16.dp))
 
-        if (showError) {
-            Text("Email o contraseña incorrectos.", color = MaterialTheme.colorScheme.error)
-            Spacer(modifier = Modifier.height(8.dp))
+        if (!error.isNullOrBlank()) {
+            Spacer(Modifier.height(6.dp))
+            Text(
+                text = error!!,
+                color = MaterialTheme.colorScheme.error,
+                style = MaterialTheme.typography.bodySmall
+            )
         }
+
+        Spacer(Modifier.height(16.dp))
 
         Button(
             onClick = {
-                if (authRepository.loginUser(email, password)) {
-                    showError = false
-                    onLoginSuccess() // Navegar a Home o pantalla principal
-                } else {
-                    showError = true
+                when {
+                    !isValidEmail(email) -> error = "Correo no válido."
+                    password.isBlank()  -> error = "Ingresa tu contraseña."
+                    AuthRepository.loginUser(email, password) -> onLoginSuccess()
+                    else -> error = "Correo o contraseña incorrectos."
                 }
             },
             modifier = Modifier.fillMaxWidth()
         ) {
-            Text("Login")
+            Text("Entrar")
         }
-        Spacer(modifier = Modifier.height(8.dp))
+
+        Spacer(Modifier.height(10.dp))
+
         Text(
-            text = "¿Olvidaste tu contraseña?",
-            modifier = Modifier.clickable { onNavigateToForgotPassword() },
-            color = MaterialTheme.colorScheme.primary
+            "¿Olvidaste tu contraseña?",
+            color = MaterialTheme.colorScheme.primary,
+            modifier = Modifier.clickable { onNavigateToForgotPassword() }
         )
-        Spacer(modifier = Modifier.height(8.dp))
+
+        Spacer(Modifier.height(20.dp))
+
         Text(
-            text = "¿No tienes cuenta? Regístrate",
-            modifier = Modifier.clickable { onNavigateToRegister() },
-            color = MaterialTheme.colorScheme.primary
+            "¿No tienes cuenta? Regístrate",
+            color = MaterialTheme.colorScheme.primary,
+            modifier = Modifier.clickable { onNavigateToRegister() }
         )
     }
 }
