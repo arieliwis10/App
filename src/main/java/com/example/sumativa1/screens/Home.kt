@@ -14,11 +14,13 @@ import com.airbnb.lottie.compose.LottieCompositionSpec
 import com.airbnb.lottie.compose.LottieConstants
 import com.airbnb.lottie.compose.rememberLottieComposition
 import com.example.sumativa1.R
+import com.example.sumativa1.AppTopBar
 
 @Composable
-fun HomeScreen(
+fun Home(
     onLogout: () -> Unit
 ) {
+
     val composition by rememberLottieComposition(
         LottieCompositionSpec.RawRes(R.raw.creacion)
     )
