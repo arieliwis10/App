@@ -5,4 +5,11 @@ sealed class NavRouter(val route: String) {
     data object Register : NavRouter("register")
     data object Forgot : NavRouter("forgot")
     data object Home : NavRouter("home")
+
+    data object Write : NavRouter("write")
+
+    data object Read : NavRouter("read")
+
+    data object FindDevice : NavRouter("findDevice")
+    data object Speak : NavRouter("speak")
 }
