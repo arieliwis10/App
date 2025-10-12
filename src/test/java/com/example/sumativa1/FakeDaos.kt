@@ -38,7 +38,7 @@ class FakeUserDao : UserDao {
         data.firstOrNull { it.email.equals(email, ignoreCase = true) && it.password == password }
 }
 
-// ===== FakeMessageDao =====
+
 class FakeMessageDao : MessageDao {
     private val autoId = AtomicInteger(1)
     private val data = mutableListOf<Message>()
